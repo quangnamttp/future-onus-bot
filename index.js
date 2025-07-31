@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const config = require('./config.json');
 require('dotenv').config();
+const cron = require('node-cron');
 
 const { fetchMarketData } = require('./lib/marketData');
 const app = express();
