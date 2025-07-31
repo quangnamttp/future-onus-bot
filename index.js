@@ -4,6 +4,8 @@ const axios = require('axios');
 const config = require('./config.json');
 require('dotenv').config();
 
+const { fetchMarketData } = require('./lib/marketData');
+const { fetchMarketData } = require('./lib/marketData');
 const app = express();
 app.use(bodyParser.json());
 
@@ -86,6 +88,29 @@ app.post('/webhook', async (req, res) => {
 app.get("/", (req, res) => {
   res.status(200).send("Bot is running.");
 });
+
+// Bản tin 06:00 sáng
+cron.schedule('0 6 * * *', async () => {
+  if (botStatus !== "ON") return;
+
+  const data = await fetchMarketData();
+  if (!data) return;
+
+  let message = `${data.greeting}\n\n`;
+
+  data.prices.forEach(p => {
+    message += `💰 ${p.name}: ${p.usd} USD | ${p.vnd} VND (${p.change}% 24h)\n`;
+  });
+
+  message += `\n🔁 Funding:\n`;
+  Object.entries(data.funding).forEach(([coin, val]) => {
+    message += `• ${coin}: ${val}\n`;
+  });
+
+  message += `\n📊 Volume: ${data.volume}\n📈 Xu hướng: ${data.trend}`;
+
+  sendMessage("24110537551888914", message);
+}, { timezone: "Asia/Ho_Chi_Minh" });
 
 // Khởi động server
 const PORT = process.env.PORT || 3000;
