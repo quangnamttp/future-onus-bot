@@ -90,7 +90,7 @@ app.get("/", (req, res) => {
 });
 
 // Bản tin 06:00 sáng
-cron.schedule('0 6 * * *', async () => {
+cron.schedule('* * * * *', async () => {
   if (botStatus !== "ON") return;
 
   const data = await fetchMarketData();
