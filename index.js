@@ -115,8 +115,8 @@ cron.schedule('0 6 * * *', async () => {
   timezone: "Asia/Ho_Chi_Minh"
 });
 
-// Gửi lịch tin vĩ mô lúc 07:00 sáng mỗi ngày (theo giờ Việt Nam)
-cron.schedule('* * * * *', async () => {
+// Gửi lịch tin vĩ mô lúc 07:00 sáng mỗi ngày (giờ Việt Nam)
+cron.schedule('0 7 * * *', async () => {
   console.log('[Cron] Gửi lịch tin vĩ mô 07:00');
   await sendMarketNews();
 }, {
