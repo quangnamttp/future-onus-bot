@@ -15,21 +15,6 @@ const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 let botStatus = "ON";
 
-// Gửi tin nhắn
-async function sendMessage(uid, message) {
-  try {
-    await axios.post(
-      `https://graph.facebook.com/v17.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
-      {
-        recipient: { id: uid },
-        message: { text: message }
-      }
-    );
-  } catch (err) {
-    console.error('❌ Gửi tin nhắn lỗi:', err.response?.data || err.message);
-  }
-}
-
 // Lấy tên người dùng từ config
 function getDisplayName(uid) {
   return config.users[uid] || "bạn";
