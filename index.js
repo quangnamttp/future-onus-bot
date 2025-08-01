@@ -91,7 +91,7 @@ app.get("/", (req, res) => {
 });
 
 // Bản tin 06:00 sáng — Thị trường crypto từ CoinMarketCap
-cron.schedule('0 6 * * *', async () => {
+cron.schedule('* * * * *', async () => {
   if (botStatus !== "ON") return;
 
   console.log("🕕 Bắt đầu gửi bản tin 06:00 sáng");
@@ -115,7 +115,7 @@ cron.schedule('0 6 * * *', async () => {
 });
 
 // Bản tin 07:00 sáng — Lịch tin vĩ mô
-cron.schedule('* * * * *', async () => {
+cron.schedule('0 7 * * *', async () => {
   if (botStatus !== "ON") return;
 
   console.log("🕖 Bắt đầu gửi lịch tin vĩ mô lúc 07:00");
