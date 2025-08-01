@@ -62,14 +62,14 @@ app.post('/webhook', async (req, res) => {
 
       if (message.includes("bật") || message.includes("on")) {
         if (botStatus === "ON") {
-          sendMessage(sender_psid, "✅ Bot đang BẬT sẵn rồi.");
+          sendMessage(sender_psid, "✅ Bot đang BẬT sẵn rồi bạn không cần thực hiện lại.");
         } else {
           botStatus = "ON";
           sendMessage(sender_psid, "🔛 Bot đã được BẬT.");
         }
       } else if (message.includes("tắt") || message.includes("off")) {
         if (botStatus === "OFF") {
-          sendMessage(sender_psid, "🛑 Bot đang TẮT sẵn rồi.");
+          sendMessage(sender_psid, "🛑 Bot đang TẮT sẵn rồi bạn không cần thực hiện lại.");
         } else {
           botStatus = "OFF";
           sendMessage(sender_psid, "🔴 Bot đã được TẮT.");
