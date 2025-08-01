@@ -9,7 +9,7 @@ const cron = require('node-cron');
 const { sendMessage } = require('./utils/sendMessage');
 
 const app = express();
-app.use(bodyParser.json());
+app.use(bodyParser.json()); 
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
