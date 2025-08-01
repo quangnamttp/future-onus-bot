@@ -115,16 +115,36 @@ cron.schedule('0 6 * * *', async () => {
 });
 
 // Bản tin 07:00 sáng — Lịch tin vĩ mô
-cron.schedule('* * * * *', async () => {
+cron.schedule('0 7 * * *', async () => {
   if (botStatus !== "ON") return;
 
   console.log("🕖 Bắt đầu gửi lịch tin vĩ mô lúc 07:00");
 
   const news = await fetchMacroNews();
+
   if (!news || news.length === 0) {
     await sendMessage("24110537551888914", "📅 07:00: Hôm nay không có tin vĩ mô đáng chú ý.");
     return;
   }
+
+  let message = "🗓️ *Lịch tin vĩ mô hôm nay* (ảnh hưởng từ Trung bình trở lên):\n\n";
+  for (const item of news) {
+    const block = `🕒 ${item.time} - ${item.country}\n• ${item.title}\n• Mức độ ảnh hưởng: ${item.impact}\n\n`;
+
+    // Nếu thêm block sẽ vượt quá 2000 ký tự
+    if ((message + block).length > 1900) {
+      await sendMessage("24110537551888914", message);
+      message = ""; // Reset để bắt đầu phần mới
+    }
+
+    message += block;
+  }
+
+  // Gửi phần còn lại (nếu có)
+  if (message.trim()) {
+    await sendMessage("24110537551888914", message);
+  }
+});
 
   let message = "🗓️ *Lịch tin vĩ mô hôm nay* (ảnh hưởng từ Trung bình trở lên):\n\n";
   news.forEach(item => {
