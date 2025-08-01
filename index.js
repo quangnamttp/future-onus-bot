@@ -114,46 +114,12 @@ cron.schedule('0 6 * * *', async () => {
   timezone: "Asia/Ho_Chi_Minh"
 });
 
-// Bản tin 07:00 sáng — Lịch tin vĩ mô
-cron.schedule('* * * * *', async () => {
-  if (botStatus !== "ON") return;
-
-  console.log("🕖 Bắt đầu gửi lịch tin vĩ mô lúc 07:00");
-
-  const news = await fetchMacroNews();
-  if (!news || news.length === 0) {
-    await sendMessage("24110537551888914", "📅 07:00: Hôm nay không có tin vĩ mô đáng chú ý.");
-    return;
-  }
-
-  // Tạo tiêu đề mở đầu
-  const today = new Date();
-  const weekday = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
-  const title = `🗓️ Hôm nay là ${weekday[today.getDay()]}, ${today.toLocaleDateString('vi-VN')}\n` +
-                `Lịch kinh tế có những sự kiện đáng chú ý sau (ảnh hưởng từ Trung bình trở lên):\n\n`;
-
-  let message = title;
-
-  for (const item of news) {
-    const block = `🇦🇶 ${item.country} — ${item.time}\n` +
-                  `• ${item.title}\n` +
-                  `• Mức độ ảnh hưởng: ${item.impact} ${item.impact === "Cao" ? "🚨" : "⚠️"}\n\n`;
-
-    // Nếu sắp vượt 2000 ký tự, gửi và reset
-    if ((message + block).length > 1900) {
-      await sendMessage("24110537551888914", message);
-      message = "";
-    }
-
-    message += block;
-  }
-
-  // Gửi phần còn lại nếu còn
-  if (message.trim()) {
-    await sendMessage("24110537551888914", message);
-  }
+// Gửi lịch tin vĩ mô lúc 07:00 sáng mỗi ngày (theo giờ Việt Nam)
+cron.schedule('0 0 7 * * *', async () => {
+  console.log('[Cron] Gửi lịch tin vĩ mô 07:00');
+  await sendMarketNews();
 }, {
-  timezone: "Asia/Ho_Chi_Minh"
+  timezone: 'Asia/Ho_Chi_Minh'
 });
 
 // Khởi động server
