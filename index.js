@@ -115,7 +115,7 @@ cron.schedule('0 6 * * *', async () => {
 });
 
 // Bản tin 07:00 sáng — Lịch tin vĩ mô
-cron.schedule('0 7 * * *', async () => {
+cron.schedule('* * * * *', async () => {
   if (botStatus !== "ON") return;
 
   console.log("🕖 Bắt đầu gửi lịch tin vĩ mô lúc 07:00");
