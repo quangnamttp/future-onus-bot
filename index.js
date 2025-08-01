@@ -6,7 +6,7 @@ const { fetchMarketData } = require('./lib/marketData');
 const { fetchMacroNews } = require('./lib/marketNews');
 require('dotenv').config();
 const cron = require('node-cron');
-const { sendMarketNews } = require('./utils/marketNews');
+const { sendMessage } = require('./utils/sendMessage');
 
 const app = express();
 app.use(bodyParser.json());
