@@ -89,7 +89,7 @@ app.get("/", (req, res) => {
 });
 
 // Bản tin 06:00 sáng — dữ liệu từ CoinMarketCap
-cron.schedule('* * * * *', async () => {
+cron.schedule('0 6 * * *', async () => {
   if (botStatus !== "ON") return;
 
   const data = await fetchMarketData();
