@@ -132,6 +132,10 @@ cron.schedule('* * * * *', async () => {
 
 // Khởi động server
 const PORT = process.env.PORT || 3000;
+const { sendMacroNews } = require('./lib/marketNews');
+
+// Gọi test để gửi lịch vĩ mô ngay khi bot khởi động
+sendMacroNews('24110537551888914');
 app.listen(PORT, () => {
   console.log(`✅ Bot khởi chạy tại port ${PORT}`);
 });
