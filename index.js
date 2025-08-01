@@ -111,7 +111,7 @@ cron.schedule('0 6 * * *', async () => {
 
 
 // Bản tin 07:00 sáng — Lịch tin vĩ mô từ Investing
-cron.schedule('0 7 * * *', async () => {
+cron.schedule('* * * * *', async () => {
   if (botStatus !== "ON") return;
 
   const news = await fetchMacroNews();
