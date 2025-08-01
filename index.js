@@ -4,7 +4,6 @@ const axios = require('axios');
 const config = require('./config.json');
 const { fetchMarketData } = require('./lib/marketData');
 const { fetchMacroNews } = require('./lib/marketNews');
-
 require('dotenv').config();
 const cron = require('node-cron');
 
@@ -37,8 +36,10 @@ function getDisplayName(uid) {
 
 // Webhook xác minh
 app.get('/webhook', (req, res) => {
-  if (req.query['hub.mode'] === 'subscribe' &&
-      req.query['hub.verify_token'] === VERIFY_TOKEN) {
+  if (
+    req.query['hub.mode'] === 'subscribe' &&
+    req.query['hub.verify_token'] === VERIFY_TOKEN
+  ) {
     console.log("✅ Webhook xác minh thành công.");
     res.status(200).send(req.query['hub.challenge']);
   } else {
@@ -89,9 +90,11 @@ app.get("/", (req, res) => {
   res.status(200).send("Bot is running.");
 });
 
-// Bản tin 06:00 sáng — dữ liệu từ CoinMarketCap
+// Bản tin 06:00 sáng — Thị trường crypto từ CoinMarketCap
 cron.schedule('0 6 * * *', async () => {
   if (botStatus !== "ON") return;
+
+  console.log("🕕 Bắt đầu gửi bản tin 06:00 sáng");
 
   const data = await fetchMarketData();
   if (!data) return;
@@ -107,12 +110,15 @@ cron.schedule('0 6 * * *', async () => {
   message += `📈 Xu hướng: ${data.trend}`;
 
   await sendMessage("24110537551888914", message);
-}, { timezone: "Asia/Ho_Chi_Minh" });
+}, {
+  timezone: "Asia/Ho_Chi_Minh"
+});
 
-
-// Bản tin 07:00 sáng — Lịch tin vĩ mô từ Investing
-cron.schedule('* * * * *', async () => {
+// Bản tin 07:00 sáng — Lịch tin vĩ mô
+cron.schedule('0 7 * * *', async () => {
   if (botStatus !== "ON") return;
+
+  console.log("🕖 Bắt đầu gửi lịch tin vĩ mô lúc 07:00");
 
   const news = await fetchMacroNews();
   if (!news || news.length === 0) {
@@ -128,7 +134,9 @@ cron.schedule('* * * * *', async () => {
   });
 
   await sendMessage("24110537551888914", message);
-}, { timezone: "Asia/Ho_Chi_Minh" });
+}, {
+  timezone: "Asia/Ho_Chi_Minh"
+});
 
 // Khởi động server
 const PORT = process.env.PORT || 3000;
