@@ -96,18 +96,16 @@ cron.schedule('* * * * *', async () => {
   if (!data) return;
 
   let message = `${data.greeting}\n\n`;
-
-  data.prices.forEach(p => {
-    const xuHuong = parseFloat(p.change) >= 0 ? "📈 Tăng" : "📉 Giảm";
-    message += `🪙 ${p.name}\n`;
-    message += `• Giá: ${p.usd} USD\n`;
-    message += `• Biến động 24h: ${p.change}% (${xuHuong})\n`;
-    message += `• Vốn hóa: ${p.marketCap} USD\n`;
-    message += `• Volume 24h: ${p.volume} USD\n`;
-    message += `• Cung lưu hành: ${p.supply} ${p.name}\n\n`;
+  data.topGainers.forEach((coin, index) => {
+    message += `🔥 Top ${index + 1}: ${coin.name} (${coin.symbol})\n`;
+    message += `• Giá: ${coin.price} USD\n`;
+    message += `• Tăng: ${coin.change}%\n`;
+    message += `• Vốn hóa: ${coin.marketCap} USD\n\n`;
   });
 
-  sendMessage("24110537551888914", message);
+  message += `📈 Xu hướng: ${data.trend}`;
+
+  await sendMessage("24110537551888914", message);
 }, { timezone: "Asia/Ho_Chi_Minh" });
 
 // Khởi động server
