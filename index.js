@@ -4,33 +4,32 @@ const axios = require('axios');
 const config = require('./config.json');
 require('dotenv').config();
 const cron = require('node-cron');
-
 const { fetchMarketData } = require('./lib/marketData');
+
 const app = express();
 app.use(bodyParser.json());
 
-const VERIFY_TOKEN = process.env.VERIFY_TOKEN || config.VERIFY_TOKEN;
-const PAGE_ACCESS_TOKEN = config.PAGE_ACCESS_TOKEN; // ✅ Dùng token trong config.json
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 let botStatus = "ON";
 
 // Gửi tin nhắn
 async function sendMessage(uid, message) {
   try {
-    const res = await axios.post(
+    await axios.post(
       `https://graph.facebook.com/v17.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
       {
         recipient: { id: uid },
         message: { text: message }
       }
     );
-    console.log(`✅ Đã gửi tin đến ${uid}`);
   } catch (err) {
     console.error('❌ Gửi tin nhắn lỗi:', err.response?.data || err.message);
   }
 }
 
-// Công cụ lấy tên xưng hô
+// Lấy tên người dùng từ config
 function getDisplayName(uid) {
   return config.users[uid] || "bạn";
 }
@@ -42,12 +41,12 @@ app.get('/webhook', (req, res) => {
     console.log("✅ Webhook xác minh thành công.");
     res.status(200).send(req.query['hub.challenge']);
   } else {
-    console.error("❌ Webhook xác minh thất bại.");
+    console.error("❌ Xác minh thất bại.");
     res.sendStatus(403);
   }
 });
 
-// Xử lý tin nhắn đến
+// Xử lý tin nhắn người dùng
 app.post('/webhook', async (req, res) => {
   const body = req.body;
   if (body.object === 'page') {
@@ -75,7 +74,7 @@ app.post('/webhook', async (req, res) => {
       } else if (message.includes("trạng thái")) {
         sendMessage(sender_psid, `📍 Trạng thái hiện tại: ${botStatus}`);
       } else if (message.includes("lịch hôm nay")) {
-        sendMessage(sender_psid, "📅 Đây là lịch hôm nay...");
+        sendMessage(sender_psid, "📅 Đây là lịch hôm nay... (đang cập nhật)");
       }
     }
     res.status(200).send('EVENT_RECEIVED');
@@ -89,11 +88,9 @@ app.get("/", (req, res) => {
   res.status(200).send("Bot is running.");
 });
 
-// Bản tin 06:00 sáng (test mỗi phút tạm thời)
+// Bản tin 06:00 sáng — dữ liệu từ CoinMarketCap
 cron.schedule('* * * * *', async () => {
   if (botStatus !== "ON") return;
-
-  console.log("⏰ Đang gửi bản tin tự động...");
 
   const data = await fetchMarketData();
   if (!data) return;
@@ -101,24 +98,20 @@ cron.schedule('* * * * *', async () => {
   let message = `${data.greeting}\n\n`;
 
   data.prices.forEach(p => {
-    message += `💰 ${p.name}: ${p.usd} USD | ${p.vnd} VND (${p.change}% 24h)\n`;
+    const xuHuong = parseFloat(p.change) >= 0 ? "📈 Tăng" : "📉 Giảm";
+    message += `🪙 ${p.name}\n`;
+    message += `• Giá: ${p.usd} USD\n`;
+    message += `• Biến động 24h: ${p.change}% (${xuHuong})\n`;
+    message += `• Vốn hóa: ${p.marketCap} USD\n`;
+    message += `• Volume 24h: ${p.volume} USD\n`;
+    message += `• Cung lưu hành: ${p.supply} ${p.name}\n\n`;
   });
 
-  message += `\n🔁 Funding:\n`;
-  Object.entries(data.funding).forEach(([coin, val]) => {
-    message += `• ${coin}: ${val}\n`;
-  });
-
-  message += `\n📊 Volume: ${data.volume}\n📈 Xu hướng: ${data.trend}`;
-
-  // Gửi tới tất cả UID trong config
-  for (const uid of Object.keys(config.users)) {
-    await sendMessage(uid, message);
-  }
+  sendMessage("24110537551888914", message);
 }, { timezone: "Asia/Ho_Chi_Minh" });
 
 // Khởi động server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Bot khởi chạy tại port ${PORT}`);
+  console.log(`✅ Bot khởi chạy tại port ${PORT}`);
 });
