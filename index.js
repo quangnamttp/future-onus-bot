@@ -9,23 +9,24 @@ const { fetchMarketData } = require('./lib/marketData');
 const app = express();
 app.use(bodyParser.json());
 
-const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
-const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN || config.VERIFY_TOKEN;
+const PAGE_ACCESS_TOKEN = config.PAGE_ACCESS_TOKEN; // ✅ Dùng token trong config.json
 
 let botStatus = "ON";
 
 // Gửi tin nhắn
 async function sendMessage(uid, message) {
   try {
-    await axios.post(
+    const res = await axios.post(
       `https://graph.facebook.com/v17.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
       {
         recipient: { id: uid },
         message: { text: message }
       }
     );
+    console.log(`✅ Đã gửi tin đến ${uid}`);
   } catch (err) {
-    console.error('Gửi tin nhắn lỗi:', err.response?.data || err.message);
+    console.error('❌ Gửi tin nhắn lỗi:', err.response?.data || err.message);
   }
 }
 
@@ -38,10 +39,10 @@ function getDisplayName(uid) {
 app.get('/webhook', (req, res) => {
   if (req.query['hub.mode'] === 'subscribe' &&
       req.query['hub.verify_token'] === VERIFY_TOKEN) {
-    console.log("Webhook xác minh thành công.");
+    console.log("✅ Webhook xác minh thành công.");
     res.status(200).send(req.query['hub.challenge']);
   } else {
-    console.error("Xác minh thất bại.");
+    console.error("❌ Webhook xác minh thất bại.");
     res.sendStatus(403);
   }
 });
@@ -74,7 +75,6 @@ app.post('/webhook', async (req, res) => {
       } else if (message.includes("trạng thái")) {
         sendMessage(sender_psid, `📍 Trạng thái hiện tại: ${botStatus}`);
       } else if (message.includes("lịch hôm nay")) {
-        // Sau này bạn thêm logic crawl lịch vào đây
         sendMessage(sender_psid, "📅 Đây là lịch hôm nay...");
       }
     }
@@ -89,9 +89,11 @@ app.get("/", (req, res) => {
   res.status(200).send("Bot is running.");
 });
 
-// Bản tin 06:00 sáng
+// Bản tin 06:00 sáng (test mỗi phút tạm thời)
 cron.schedule('* * * * *', async () => {
   if (botStatus !== "ON") return;
+
+  console.log("⏰ Đang gửi bản tin tự động...");
 
   const data = await fetchMarketData();
   if (!data) return;
@@ -109,11 +111,14 @@ cron.schedule('* * * * *', async () => {
 
   message += `\n📊 Volume: ${data.volume}\n📈 Xu hướng: ${data.trend}`;
 
-  sendMessage("24110537551888914", message);
+  // Gửi tới tất cả UID trong config
+  for (const uid of Object.keys(config.users)) {
+    await sendMessage(uid, message);
+  }
 }, { timezone: "Asia/Ho_Chi_Minh" });
 
 // Khởi động server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Bot khởi chạy tại port ${PORT}`);
+  console.log(`🚀 Bot khởi chạy tại port ${PORT}`);
 });
