@@ -140,20 +140,9 @@ cron.schedule('* * * * *', async () => {
     message += block;
   }
 
-  // Gửi phần còn lại (nếu có)
   if (message.trim()) {
     await sendMessage("24110537551888914", message);
   }
-});
-
-  let message = "🗓️ *Lịch tin vĩ mô hôm nay* (ảnh hưởng từ Trung bình trở lên):\n\n";
-  news.forEach(item => {
-    message += `🕒 ${item.time} - ${item.country}\n`;
-    message += `• ${item.title}\n`;
-    message += `• Mức độ ảnh hưởng: ${item.impact}\n\n`;
-  });
-
-  await sendMessage("24110537551888914", message);
 }, {
   timezone: "Asia/Ho_Chi_Minh"
 });
