@@ -6,14 +6,29 @@ const { fetchMarketData } = require('./lib/marketData');
 const { fetchMacroNews, sendMarketNews } = require('./lib/marketNews');
 require('dotenv').config();
 const cron = require('node-cron');
-const { sendMessage } = require('./utils/sendMessage');
 
 const app = express();
-app.use(bodyParser.json()); 
+app.use(bodyParser.json());
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 let botStatus = "ON";
+
+// GỬI TIN NHẮN — GỘP TRỰC TIẾP VÀO ĐÂY
+async function sendMessage(recipientId, messageText) {
+  try {
+    await axios.post(
+      `https://graph.facebook.com/v17.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+      {
+        recipient: { id: recipientId },
+        message: { text: messageText },
+      }
+    );
+    console.log(`✅ Đã gửi tin nhắn đến ${recipientId}`);
+  } catch (error) {
+    console.error("❌ Lỗi khi gửi tin nhắn:", error.response?.data || error.message);
+  }
+}
 
 // Lấy tên người dùng từ config
 function getDisplayName(uid) {
