@@ -2,16 +2,17 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const config = require('./config.json');
+const { fetchMarketData } = require('./lib/marketData');
+const { fetchMacroNews } = require('./lib/economicCalendar');
+
 require('dotenv').config();
 const cron = require('node-cron');
-const { fetchMarketData } = require('./lib/marketData');
 
 const app = express();
 app.use(bodyParser.json());
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-
 let botStatus = "ON";
 
 // Gửi tin nhắn
@@ -104,6 +105,27 @@ cron.schedule('0 6 * * *', async () => {
   });
 
   message += `📈 Xu hướng: ${data.trend}`;
+
+  await sendMessage("24110537551888914", message);
+}, { timezone: "Asia/Ho_Chi_Minh" });
+
+
+// Bản tin 07:00 sáng — Lịch tin vĩ mô từ Investing
+cron.schedule('0 7 * * *', async () => {
+  if (botStatus !== "ON") return;
+
+  const news = await fetchMacroNews();
+  if (!news || news.length === 0) {
+    await sendMessage("24110537551888914", "📅 07:00: Hôm nay không có tin vĩ mô đáng chú ý.");
+    return;
+  }
+
+  let message = "🗓️ *Lịch tin vĩ mô hôm nay* (ảnh hưởng từ Trung bình trở lên):\n\n";
+  news.forEach(item => {
+    message += `🕒 ${item.time} - ${item.country}\n`;
+    message += `• ${item.title}\n`;
+    message += `• Mức độ ảnh hưởng: ${item.impact}\n\n`;
+  });
 
   await sendMessage("24110537551888914", message);
 }, { timezone: "Asia/Ho_Chi_Minh" });
