@@ -139,6 +139,9 @@ async function fetchSignalsFromGoonus() {
 
 // Gửi tín hiệu mỗi 15 phút từ 06:00 đến 22:00
 cron.schedule('*/15 6-22 * * *', async () => {
+  if (botStatus !== "ON") return;
+
+  
   const signals = await fetchSignalsFromGoonus();
   await sendTradeSignals(signals);
 });
