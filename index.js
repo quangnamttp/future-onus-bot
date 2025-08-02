@@ -126,6 +126,23 @@ cron.schedule('0 7 * * *', async () => {
   timezone: 'Asia/Ho_Chi_Minh'
 });
 
+// Lấy tín hiệu từ Goonus
+async function fetchSignalsFromGoonus() {
+  try {
+    const res = await axios.get('https://goonus.io/api/signal'); // tuỳ endpoint của bạn
+    return res.data || [];
+  } catch (err) {
+    console.error('❌ Lỗi lấy tín hiệu:', err.message);
+    return [];
+  }
+}
+
+// Gửi tín hiệu mỗi 15 phút từ 06:00 đến 22:00
+cron.schedule('*/15 6-22 * * *', async () => {
+  const signals = await fetchSignalsFromGoonus();
+  await sendTradeSignals(signals);
+});
+
 // Khởi động server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
