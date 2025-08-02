@@ -4,6 +4,7 @@ const axios = require('axios');
 const config = require('./config.json');
 const { fetchMarketData } = require('./lib/marketData');
 const { fetchMarketNews } = require('./lib/marketNews');
+const { sendTradeSignals } = require('./lib/tradeSignals');
 require('dotenv').config();
 const cron = require('node-cron');
 
